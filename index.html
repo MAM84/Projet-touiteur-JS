@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="description" content="Description de ma page">
+    <title>Touiteur</title>
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body id="body">
+    <h1>🦅 touiteur 🦅</h1>    
+    <section class="container">
+        <form action="x"class="main-form">
+            <h2>envoie ton touit</h2>
+            <label for="pseudo-touit" class="pseudo">Pseudo</label>
+            <input class="input input-pseudo" type="text" name="pseudo" id="pseudo-touit" maxlength="16" required autofocus>
+            <label for="msg-touit" class="msg">Votre message</label>
+            <textarea id="msg-touit" class="input input-msg" maxlength="256" required></textarea>
+            <button class="btn" id="send-btn-msg" type=submit value="Envoyer un message">
+                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24"><path d="M24,0,18,22,9.871,14.761l7.8-8.234L7.215,13.754,0,12ZM9,16.668V24l3.258-4.431Z"/></svg>
+                Envoyer</button>
+        </form>
+    </section>
+
+    <section class="container">
+        <div class="contenu">
+            <h2>touits les plus likés</h2>
+            <div class='contenu-touit-likes' id="contenu-touit-likes">
+
+            </div>    
+        </div>
+    </section>
+
+    <section class="container">
+        <div class="contenu">
+            <h2>trending</h2>
+            <div class='contenu-touit' id="contenu-trending">
+
+            </div>    
+        </div>
+    </section>
+
+    <section class="container">
+        <div class="contenu">
+            <h2>touits reçus</h2>
+            <div class='contenu-touit' id="contenu-touit">
+
+            </div>
+            <aside class="modal" id="container-modal">
+                <div class="modal-wrapper" id="modal">
+                    <button class="modal-close" id="modal-close" value="Fermer la modal">X</button>
+                    <form action="x">
+                        <label for="pseudo-comment">Pseudo</label>
+                        <input class="input input-pseudo-comment" type="text" name="pseudo" id="pseudo-comment" maxlength="16" required autofocus>
+                        <label for="comment">Votre commentaire</label>
+                        <textarea id="msg-comment" maxlength="256" autofocus required class="input input-comment"></textarea>
+                        <button id="send-btn-comment" class="btn" type="submit" value="Envoyer le commentaire">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24"><path d="M24,0,18,22,9.871,14.761l7.8-8.234L7.215,13.754,0,12ZM9,16.668V24l3.258-4.431Z"/></svg>
+                             Envoyer</button>
+                    </form>
+
+                </div>
+
+            </aside>    
+        </div>
+    </section>
+    <!-- <div id="pagination"></div> -->
+    <nav>
+        <ul class="pagination">
+            <li><a href="">«</a></li>
+            <li><a class="active" href="">1</a></li>
+            <li><a href="">2</a></li>
+            <li><a href="">3</a></li>
+            <li><a href="">4</a></li>
+            <li><a href="">»</a></li>
+        </ul>
+    </nav>
+    <script src='js/script.js'></script> 
+    <!-- <script src='js/scriptPage.js'></script>  -->
+</body>
+</html>

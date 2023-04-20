@@ -1,0 +1,282 @@
+from flask import Flask, request, jsonify
+from flask_cors import CORS
+from werkzeug.routing import Rule
+from functools import wraps
+import json
+import time
+import re
+import os
+app = Flask(__name__)
+CORS(app)
+
+
+app.url_map.add(Rule('/', endpoint='index'))
+
+messages = []
+comments = {}
+if os.path.isfile('messages.json'):
+    with open('messages.json') as json_file:
+        messages = json.load(json_file)
+if os.path.isfile('comments.json'):
+    with open('comments.json') as json_file:
+        comments = json.load(json_file)
+
+
+def auto_save():
+    global messages, comments
+    with open('messages.json', 'w') as outfile:
+        json.dump(messages, outfile)
+    with open('comments.json', 'w') as outfile:
+        json.dump(comments, outfile)
+
+
+def get_timestamp():
+    return int(time.time())
+
+
+@app.endpoint("index")
+def all_root():
+    escformat = lambda content: "".join(chr(b) if b > 31 and b < 127 else "\\x" + hex(b)[2:] for b in content)
+    result = """<h1>Bien joué !</h1>
+    <p>Vous êtes à la racine du serveur. C'est pas mal déjà, maintenant il faut l'utiliser !</p>
+    <p>Votre IP : {ip}</p>
+    <p>Votre requête :</p>
+    <pre style=\"font-familiy: consolas; padding: 10px; margin: 10px; background-color: #eee\">Method : {method}
+
+{headers}
+
+Query string : {querystring}
+
+{body}</pre>
+    """.format(
+        ip=request.remote_addr,
+        method=request.method,
+        headers=request.headers,
+        querystring=escformat(request.query_string),
+        body=escformat(request.get_data()) or "Empty body"
+    )
+    return result
+
+# @app.route("/admin", methods=["GET"])
+# @requires_auth
+# def admin_panel():
+    # return render_template("admin.html")
+
+
+@app.route("/list", methods=["GET"])
+def get_messages():
+    global messages
+    response = {}
+    for i in range(len(messages)):
+        messages[i]["comments_count"] = len(comments[messages[i]["id"]])
+    if "ts" in request.args:
+        if re.match(r"^\d+$", request.args["ts"]):
+            response = {"ts": get_timestamp(), "messages": [msg for msg in messages if msg["ts"] > int(request.args["ts"])]}
+        else:
+            response = {"error": "ts must be a number !"}
+    else:
+        response = {"ts": get_timestamp(), "messages": messages}
+    return jsonify(response)
+
+
+@app.route("/get", methods=["GET"])
+def get_message():
+    global messages
+    response = {}
+    if "id" not in request.args:
+        response["error"] = "ID not found !"
+    else:
+        message = next((m for m in messages if m["id"] == request.args["id"]), None)
+        if message:
+            response["success"] = True
+            response["data"] = message
+        else:
+            response["error"] = "This message doesn't exists !"
+    return jsonify(response)
+
+
+@app.route("/send", methods=["POST"])
+def post_message():
+    response = {}
+    if "name" not in request.form:
+        response["error"] = "Name not found !"
+    elif "message" not in request.form:
+        response["error"] = "Message not found !"
+    else:
+        name, message = request.form["name"].strip(), request.form["message"].strip()
+        if len(name) < 3 or len(name) > 16:
+            response["error"] = "Name length must be between 3 and 16 chars !"
+        elif len(message) < 3 or len(message) > 256:
+            response["error"] = "Message length must be between 3 and 256 chars !"
+        # elif "<" in message and message.lower().count("</") + message.lower().count("<b>") + message.lower().count("<i>") + message.lower().count("<style>") != message.count("<"):
+            # messages.append({
+                # "name": name,
+                # "message": "<b style='color: red'>HACKER DETECTED</b>",
+                # "ts": get_timestamp()
+            # })
+            # response["error"] = "Script injection ! Bad hacker, bad ! :("
+        else:
+            comments["{}".format(len(messages))] = []
+            messages.append({
+                "ip": request.remote_addr,
+                "id": "{}".format(len(messages)),
+                "name": name,
+                "message": message,
+                "ts": get_timestamp(),
+                "likes": 0,
+                "comments_count": 0
+            })
+            auto_save()
+            response["success"] = True
+            response["id"] = "{}".format(messages[-1]["id"])
+    return jsonify(response)
+
+
+@app.route("/trending", methods=["GET"])
+def get_trending():
+    response = {}
+    words = {}
+    for message in messages:
+        occ = re.findall(r"\b([a-zA-Z0-9_-]{3,32})\b", message["message"])
+        for oc in occ:
+            words[oc.lower()] = words[oc.lower()] + 1 if oc.lower() in words else 1
+    for word in words:
+        if words[word] > 1:
+            response[word] = words[word]
+    return jsonify(response)
+
+
+@app.route("/influencers", methods=["GET"])
+def get_influencers():
+    response = {}
+    users = {}
+    
+    for touit in messages:
+        if touit["name"] in users:
+            users[touit["name"]]["messages"] += 1
+        else:
+            users[touit["name"]] = {
+                "messages": 1,
+                "comments": 0
+            }
+    for id in comments:
+        for comm in comments[id]:
+            if comm["name"] in users:
+                users[comm["name"]]["comments"] += 1
+            else:
+                users[comm["name"]] = {
+                    "messages": 0,
+                    "comments": 1
+                }
+    users = sorted(users.items(), key=lambda u: -u[1]["messages"]-u[1]["comments"])
+            
+    count = 1
+    if "count" in request.args:
+        if re.match(r"^[0-9]+$", request.args["count"]):
+            count = int(request.args["count"])
+        else:
+            response["error"] = "Count must be a number !"
+    
+    if "error" not in response:
+        response["user_count"] = len(users)
+        response["influencers"] = {}
+        for i in range(min(count, len(users))):
+            response["influencers"][users[i][0]] = users[i][1]
+    return jsonify(response)
+
+
+@app.route("/comments/list", methods=["GET"])
+def get_comments():
+    global comments
+    response = {}
+    if "message_id" not in request.args:
+        response["error"] = "Message ID not found !"
+    elif request.args["message_id"] not in comments:
+        response["error"] = "This message doesn't exists !"
+    else:
+        response = {"comments": comments[request.args["message_id"]]}
+    return jsonify(response)
+
+
+@app.route("/comments/send", methods=["POST"])
+def post_comments():
+    response = {}
+    if "name" not in request.form:
+        response["error"] = "Name not found !"
+    elif "comment" not in request.form:
+        response["error"] = "Comment not found !"
+    elif "message_id" not in request.form:
+        response["error"] = "Message ID not found !"
+    else:
+        name, comment, message_id = request.form["name"].strip(), request.form["comment"].strip(), request.form["message_id"]
+        if len(name) < 3 or len(name) > 16:
+            response["error"] = "Name length must be between 3 and 16 chars !"
+        elif len(comment) < 3 or len(comment) > 256:
+            response["error"] = "Comment length must be between 3 and 256 chars !"
+        elif len([msg for msg in messages if msg["id"] == message_id]) == 0:
+            response["error"] = "This message doesn't exists !"
+        else:
+            comments[message_id].append({
+                "name": name,
+                "comment": comment,
+                "ts": get_timestamp()
+            })
+            auto_save()
+            response["success"] = True
+            response["id"] = "{}".format(message_id)
+    return jsonify(response)
+
+
+@app.route("/likes/send", methods=["PUT"])
+def put_like():
+    response = {}
+    if "message_id" not in request.form:
+        response["error"] = "Message ID not found !"
+    else:
+        message_id = request.form["message_id"]
+        if len([msg for msg in messages if msg["id"] == message_id]) == 0:
+            response["error"] = "This message doesn't exists !"
+        else:
+            for i in range(len(messages)):
+                if messages[i]["id"] == message_id:
+                    messages[i]["likes"] += 1
+            auto_save()
+            response["success"] = True
+            response["id"] = "{}".format(len(messages))
+    return jsonify(response)
+
+
+@app.route("/likes/remove", methods=["DELETE"])
+def delete_like():
+    response = {}
+    if "message_id" not in request.form:
+        response["error"] = "Message ID not found !"
+    else:
+        message_id = request.form["message_id"]
+        if len([msg for msg in messages if msg["id"] == message_id]) == 0:
+            response["error"] = "This message doesn't exists !"
+        else:
+            for i in range(len(messages)):
+                if messages[i]["id"] == message_id:
+                    messages[i]["likes"] -= 1
+            auto_save()
+            response["success"] = True
+    return jsonify(response)
+
+
+@app.route("/likes/top", methods=["GET"])
+def get_likes_top():
+    response = {}
+    count = 1
+    if "count" in request.args:
+        if re.match(r"^[0-9]+$", request.args["count"]):
+            count = int(request.args["count"])
+        else:
+            response["error"] = "Count must be a number !"
+    if "error" not in response:
+        response["top"] = sorted([msg for msg in messages if msg["likes"] > 0], key=lambda m: -m["likes"])[0:count]
+    return jsonify(response)
+
+
+if __name__ == "__main__":
+    app.run(debug=False, host='0.0.0.0', port=80)

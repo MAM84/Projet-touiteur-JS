@@ -1,0 +1,422 @@
+/* Débuggueur CSS en cas de dépassement horizontal */
+/*
+* {
+    outline: 1px solid #000;
+} 
+*/
+
+:root {
+    --vertfonce:rgb(6,73,73);
+    --vertclair:rgb(12,116,116);
+    --blancclair:rgb(214,212,212);
+    --blanccasse:rgb(207,197,205);
+    --noir:rgb(8,8,8);
+}
+
+/* indie-flower-regular - latin */
+@font-face {
+    font-family: 'Indie Flower';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: local('Indie Flower'), local('IndieFlower'),
+         url('../fonts/indie-flower-v11-latin-regular.woff2') format('woff2'), /* Chrome 26+, Opera 23+, Firefox 39+ */
+         url('../fonts/indie-flower-v11-latin-regular.woff') format('woff'); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
+}
+
+ /* quicksand-regular - latin */
+@font-face {
+    font-family: 'Quicksand';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: local(''),
+         url('../fonts/quicksand-v20-latin-regular.woff2') format('woff2'), /* Chrome 26+, Opera 23+, Firefox 39+ */
+         url('../fonts/quicksand-v20-latin-regular.woff') format('woff'); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
+}
+  
+  /* quicksand-700 - latin */
+  @font-face {
+    font-family: 'Quicksand';
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+    src: local(''),
+         url('../fonts/quicksand-v20-latin-700.woff2') format('woff2'), /* Chrome 26+, Opera 23+, Firefox 39+ */
+         url('../fonts/quicksand-v20-latin-700.woff') format('woff'); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
+}
+  
+  
+body {
+    background-color: var(--vertclair);
+    margin-top: 1.5em;
+    font-family: 'Indie Flower';
+    
+}
+
+.container{
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    column-gap: 1.6rem;
+}
+
+h1{
+    text-transform: uppercase;
+    text-align: center;
+    font-size: 6em;
+    margin-bottom: 0.5em;
+    color: var(--noir);
+    text-decoration: underline overline cadetblue;;
+}
+
+h2{
+    text-transform: uppercase;
+    text-align: center;
+    font-size: 4em;
+    color: var(--blancclair);
+    background-image: url("https://s3-us-west-2.amazonaws.com/s.cdpn.io/78779/star.svg");
+}
+
+form h2{
+    grid-column: 2 / -2;
+    background-size: 10px 9px;
+    background-repeat: repeat-x;
+    background-position: bottom;
+}
+
+.contenu h2{
+    width: 65%;
+    background-size: 1px 9px;
+}
+
+h3{
+    font-size: 1em;
+    text-decoration: underline;
+    font-family: 'Quicksand';
+    margin-top: 1.5em;
+}
+
+ /* Formulaire d'envoi */
+.main-form{
+    grid-column: 3 / -3;
+    background-color: var(--vertfonce);
+    padding:1em 1em 2em;
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    column-gap: 1.6rem;
+    row-gap: 1.6rem; 
+    border: 4mm ridge rgb(146, 170, 170);
+    border-radius: 1em;
+}
+
+.main-form label{
+    padding-top: 0.5em;
+    font-size: 2em;
+    text-decoration: underline wavy;
+    color: var(--blancclair);
+}
+
+.pseudo{
+    grid-column: 1/-8;
+    grid-row: 2;   
+}
+
+.msg{
+    grid-column: 1/-7;
+    grid-row: 3;
+}
+
+.input{
+    font-family: 'Quicksand';
+    background-color:var(--blancclair);
+    margin-top: 1.25em;
+    color: rgb(6, 73, 73);
+}
+
+.input-pseudo{
+    grid-column: 3/-5;
+    grid-row: 2;
+    height: 2em;  
+}
+
+.input-msg{
+    grid-column: 3/-2;
+    grid-row: 3/5;
+    margin-bottom: 0.5em;
+    height: 8em;
+}
+
+.main-form .btn{
+    grid-column: 7/-2;
+    grid-row: 5/7;
+    font-size: 1em;
+    font-weight: bold;
+    height: 2.5em;
+    border: none;
+    border-radius: 0.5em;
+    background-color:var(--blancclair);
+    color: var(--vertfonce);
+}
+
+.main-form .btn svg{
+    fill: var(--vertfonce);
+}
+
+.main-form .btn:hover{
+    background-color:var(--vertclair);
+    color: var(--blancclair);
+    cursor : pointer;
+    transition: .3s;
+}
+
+.main-form .btn:hover svg{
+    fill: var(--blancclair);
+    transition: .3s;
+}
+
+ /* Zone de touit */
+.contenu{
+    grid-column: 2 / -2;
+    background-color: rgb(46, 43, 46);
+    margin-top: 3em;
+    margin-bottom: 3em;
+    padding: 2em 1em;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border-radius: 1em;
+}
+
+.contenu-touit{
+    display: flex;
+    flex-direction: row-reverse;
+    flex-wrap: wrap-reverse;
+    justify-content: flex-end;
+    margin-top: 1em;
+    width: 100%;
+}
+
+.contenu-touit-likes{
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 1em;
+    width: 100%;
+}
+
+article > * + *{
+    margin-top: 0;
+}
+
+.touit{
+    font-family: 'Quicksand';
+    border-radius: 1em;
+    margin : 0.5em;
+    margin-bottom: 1em;
+    padding: 0.5em;
+    background-color: var(--blanccasse);
+    height: auto;
+    width: calc(100% / 3 - 1em);
+    word-break : break-word; 
+    display: flex;
+    flex-direction: column;
+    text-align: justify;
+    position: relative;
+}
+
+.img-user{
+    position: absolute;
+    top: -16px;
+    border-radius: 50%;
+}
+
+ /* Zone de like et commentaire */
+.like-com{
+    margin-top: auto;
+    margin-left: auto;
+    padding-top: 0.5em;
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.btn-like {
+    border: none;
+    background-color:var(--blanccasse) ;
+    display: inline-flex;
+}
+
+.btn-like img{
+    filter: invert(9%) sepia(80%) saturate(7436%) hue-rotate(0deg) brightness(121%) contrast(94%);
+}
+
+.btn-like:hover img{
+    filter: invert(0%) sepia(12%) saturate(7497%) hue-rotate(38deg) brightness(93%) contrast(93%);
+    cursor : pointer;
+    transition: .3s;
+}
+
+article a{
+    text-decoration: none;
+    color: var(--vertclair);
+    font-weight: bold;
+}
+
+article a:hover{
+    color: var(--noir);
+    transition: .3s;
+}
+
+ /* Modal de la zone de commentaire */
+.modal{
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 70%);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    animation: fadeIn .3s both;   
+}
+
+.modal-wrapper{
+   background-color: var(--blanccasse);
+   width: 500px;
+   max-width: calc(100vw - 1em);
+   height: 500px;
+   max-height: calc(100vh - 1em);
+   padding-left: 1em ;
+   padding-right: 1em ;
+   overflow: auto;
+   display: flex;
+   flex-direction: column;
+   align-items: flex-start;
+   text-align: justify;
+   border: solid 0.1em;
+   border-radius: 0.5em;  
+   animation: slideFromTop .3s both;
+}
+
+.modal-close{
+    position: sticky;
+    top: 0.5em;
+    margin-left: auto;
+    margin-bottom: 0.5em;
+    background-color: var(--vertclair);
+    color: var(--blancclair);
+    font-weight: bold;
+    border: none;
+    border-radius: 0.5em;
+}
+
+.modal-close:hover{
+    cursor: pointer;
+    background-color: var(--noir);
+    transition: .3s;
+}
+
+@keyframes fadeIn {
+    from {opacity: 0;}
+    to {opacity: 1;}
+}
+
+@keyframes slideFromTop {
+    from {transform: translateY(-50px);}
+    to {transform: translateY(0px);}
+}
+
+ /* Formulaire de la zone de commentaire */
+aside form{
+    display: flex;
+    flex-direction: column;
+    width: calc(100%);
+}
+
+aside form label{
+    color: var(--vertfonce);
+    font-size: 1.2em;
+}
+
+.input-pseudo-comment{
+    height: 2em; 
+    margin-top: 0;
+    margin-bottom: 0.5em; 
+    width: 50%;
+}
+
+.input-comment{
+    margin-top: 0;
+    margin-bottom: 0.5em;
+    color : var(--noir);
+}
+
+aside form .btn{
+    display: inline-block;
+    justify-content: center;
+    align-items: center;
+    font-size: 1em;
+    font-weight: bold;
+    height: 2em;
+    margin-left: auto;
+    width: calc(25%);
+    border: none;
+    border-radius: 0.5em;
+    background-color:var(--vertclair);
+    color: var(--blancclair);
+}
+
+aside form .btn svg{
+    fill :var(--blancclair);
+}
+
+aside form .btn:hover{
+    background-color: var(--noir);
+    cursor : pointer;
+    transition: .3s;
+}
+
+aside p{
+    font-family: 'Quicksand';
+}
+
+.div-comment{
+    border: 1px solid;
+    border-radius: 0.5em;
+    margin-top: 0.5em;
+    padding: 0.25em;
+    width: 100%;
+}
+
+ /* Zone de pagination */
+nav{
+    padding-bottom: 3em;
+    text-align: center;
+}
+
+.pagination {
+    display: flex; 
+    justify-content: center;
+}
+        
+.pagination a {
+    color: var(--blanccasse);
+    font-size: 1.5em;
+    text-decoration: none;
+    padding: 4px 16px;
+}
+
+.pagination a.active{
+    background-color: var(--blanccasse);
+    color: var(--vertfonce);
+    border-radius: 0.5em;
+}
+
+.pagination a:hover:not(.active){
+    background-color: var(--vertfonce);
+    color: var(--blanccasse);
+    border-radius: 0.5em;
+    cursor: pointer;
+    transition: .3s;
+}
+
